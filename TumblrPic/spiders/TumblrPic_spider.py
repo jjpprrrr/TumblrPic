@@ -5,6 +5,7 @@ import sys
 reload(sys)
 import os
 import string
+import re
 
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
@@ -15,12 +16,13 @@ class TumblrPicSpider(CrawlSpider):
 
     try:
         os.mkdir(start_page)
-    except Ex:
+    except:
         pass
 
     name = 'TumblrPic'
     allowed_domains = ['tumblr.com']
     start_urls = ['http://' + start_page + '.tumblr.com/archive',]
+
 
     rules = [
         # next page link to follow
@@ -34,7 +36,12 @@ class TumblrPicSpider(CrawlSpider):
         post_date = response.xpath('//a[@class="meta-item post-date"]/text()').extract_first()
         for imgUrl in response.xpath('//meta[@property="og:image"]/@content').extract():
             item = TumblrpicItem()
-            item['imageUrl'] = imgUrl
+
+            if imgUrl[:12] == 'http://media':
+                item['imageUrl'] = 'https://vt.tumblr.com/tumblr' + re.search(r"_([^_]+)_", imgUrl).group(0)[:-1] + '.mp4'
+            else:
+                item['imageUrl'] = imgUrl
+
             item['postDate'] = post_date
             item['userID'] = TumblrPicSpider.start_page
 
