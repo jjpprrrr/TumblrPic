@@ -12,16 +12,20 @@ from scrapy.linkextractors import LinkExtractor
 from TumblrPic.items import TumblrpicItem
 
 class TumblrPicSpider(CrawlSpider):
-    start_page = raw_input("user id: ")
+    start_page = raw_input("user ids seperated with comma: ")
+    ids = [x.strip() for x in start_page.split(',')]
 
-    try:
-        os.mkdir(start_page)
-    except:
-        pass
+    for userid in ids:
+        try:
+            os.mkdir(userid)
+        except:
+            pass
 
     name = 'TumblrPic'
     allowed_domains = ['tumblr.com']
-    start_urls = ['http://' + start_page + '.tumblr.com/archive',]
+    start_urls = []
+    for userid in ids:
+        start_urls.append('http://' + userid + '.tumblr.com/archive')
 
 
     rules = [
@@ -43,6 +47,6 @@ class TumblrPicSpider(CrawlSpider):
                 item['imageUrl'] = imgUrl
 
             item['postDate'] = post_date
-            item['userID'] = TumblrPicSpider.start_page
+            item['userID'] = re.search('http://[_a-zA-Z0-9-]+.',response.url).group(0).split('//')[-1][:-1]
 
             yield item
