@@ -10,12 +10,19 @@ except ImportError:
     import urllib2
 import os
 from scrapy.exceptions import DropItem
+from os.path import expanduser
 
 class TumblrpicPipeline(object):
     def __init__(self):
+        self.home = expanduser("~")
+        self.data_path = os.path.join(self.home, 'Pictures')
+        self.data_path = os.path.join(self.data_path, 'TumblrPic')
+
+
+
         self.ids_seen = set()
         try:
-            f = open('data.dat', 'r')
+            f = open(os.path.join(self.data_path, 'data.dat'), 'r')
             for line in f:
                 self.ids_seen.add(line.rstrip('\n'))
         except:
@@ -29,7 +36,7 @@ class TumblrpicPipeline(object):
         if urls in self.ids_seen:
             raise DropItem("Duplicate item found: %s" % item)
         else:
-            filePath = item['userID']
+            filePath = os.path.join(self.data_path, item['userID'])
             post_date = item['postDate']
             fileName = urls.split('/')[-1]
 
@@ -39,7 +46,7 @@ class TumblrpicPipeline(object):
             f.write(picture.read())
             f.close()
             self.ids_seen.add(urls)
-            f = open('data.dat', 'a')
+            f = open(os.path.join(self.data_path, 'data.dat'), 'a')
             f.write(urls + '\n')
             f.close()
 

@@ -7,17 +7,30 @@ import os
 import string
 import re
 
+from os.path import expanduser
+
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
 from TumblrPic.items import TumblrpicItem
 
 class TumblrPicSpider(CrawlSpider):
+    # gather inputs of user IDs
     start_page = raw_input("user ids seperated with comma: ")
     ids = [x.strip() for x in start_page.split(',')]
 
+    # create a directory ~/Pictures/TumblrPic
+    home = expanduser("~")
+    data_path = os.path.join(home, 'Pictures')
+    data_path = os.path.join(data_path, 'TumblrPic')
+    try:
+        os.mkdir(data_path)
+    except:
+        pass
+
+    # now create subdictories for user IDs
     for userid in ids:
         try:
-            os.mkdir(userid)
+            os.mkdir(os.path.join(data_path, userid))
         except:
             pass
 
